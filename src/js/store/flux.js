@@ -1,45 +1,53 @@
 const getState = ({ getStore, getActions, setStore }) => {
-	return {
-		store: {
-			demo: [
-				{
-					title: "FIRST",
-					background: "white",
-					initial: "white"
-				},
-				{
-					title: "SECOND",
-					background: "white",
-					initial: "white"
-				}
-			]
-		},
-		actions: {
-			// Use getActions to call a function within a fuction
-			exampleFunction: () => {
-				getActions().changeColor(0, "green");
-			},
-			loadSomeData: () => {
-				/**
-					fetch().then().then(data => setStore({ "foo": data.bar }))
-				*/
-			},
-			changeColor: (index, color) => {
-				//get the store
-				const store = getStore();
+  return {
+    store: {
+      characters: [],
+    },
+    actions: {
+      loadCharacters: () => {
+        const method = "GET";
+        getActions()
+          .queryhandler(method, "people", "")
+          .then(({ status, data }) => {
+            if (status === 200) {
+              // Modificar la url de cada objeto en el array
+              const modifiedData = data.map((item) => {
+                // Extraer el número de la url
+                const number = item.url.match(/\d+/)[0];
+                // Reemplazar la url con el número
+                item.url = number;
+                //console.log(item);
+                return item;
+              });
+              setStore({ characters: modifiedData });
+            }
+          });
+      },
 
-				//we have to loop the entire demo array to look for the respective index
-				//and change its color
-				const demo = store.demo.map((elm, i) => {
-					if (i === index) elm.background = color;
-					return elm;
-				});
+      queryhandler: (method, type, mod) => {
+        const url = "https://swapi.dev/api/" + type + "/";
+        const resquest = {
+          method: method,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
 
-				//reset the global store
-				setStore({ demo: demo });
-			}
-		}
-	};
+        console.log(url + mod);
+
+        return fetch(url + mod, resquest).then((response) => {
+          try {
+            let requestStatus = response.status;
+            console.log(requestStatus);
+            return response.json().then((data) => {
+              return { status: requestStatus, data: data.results };
+            });
+          } catch (error) {
+            console.log(error.message);
+          }
+        });
+      },
+    },
+  };
 };
-
 export default getState;
