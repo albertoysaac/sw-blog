@@ -9,15 +9,26 @@ const getState = ({ getStore, getActions, setStore }) => {
       setFavorites: (id) => {
         getStore().characters.filter((character) => {
           if (character.url === id) {
-            let favorites = {id: character.url, name: character.name};
-            setStore({ favorites: [...getStore().favorites, favorites ] });
+            let favorites = { id: character.url, name: character.name };
+            if (
+              getStore().favorites.filter((item) => item.id === id).length === 0
+            ) {
+              setStore({ favorites: [...getStore().favorites, favorites] });
+              
+            } else {
+              getActions().removeFavorite(id);
+              
+            }
           }
         });
+        
       },
       removeFavorite: (id) => {
         getStore().favorites.filter((favorite) => {
           if (favorite.id === id) {
-            setStore({ favorites: getStore().favorites.filter((item) => item.id !== id) });
+            setStore({
+              favorites: getStore().favorites.filter((item) => item.id !== id),
+            });
           }
         });
       },
@@ -26,9 +37,9 @@ const getState = ({ getStore, getActions, setStore }) => {
         getActions()
           .queryhandler(method, "people", id)
           .then(({ status, data }) => {
-            console.log(status, data);
+            //console.log(status, data);
             if (status === 200) {
-              console.log(data);
+              //console.log(data);
               setStore({ character: data });
             }
           });
@@ -63,16 +74,14 @@ const getState = ({ getStore, getActions, setStore }) => {
           },
         };
 
-        console.log(url + mod);
-
         return fetch(url + mod, resquest).then((response) => {
           try {
             let requestStatus = response.status;
-            console.log(requestStatus);
+            //console.log(requestStatus);
             return response.json().then((data) => {
-              console.log(data);
+              //console.log(data);
               if (mod == "") {
-                console.log("mod: " + mod);
+                //console.log("mod: " + mod);
                 return { status: requestStatus, data: data.results };
               }
               if (mod !== "") {

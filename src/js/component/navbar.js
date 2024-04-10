@@ -46,7 +46,7 @@ export const Navbar = () => {
                             actions.removeFavorite(item.id);
                           }}
                         >
-                          <i class="bi bi-trash"></i>
+                          <i className="bi bi-trash"></i>
                         </button>
                       </div>
                     </li>

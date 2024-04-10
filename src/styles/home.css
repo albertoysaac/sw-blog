@@ -22,3 +22,16 @@
   border: 1px solid rgba(0, 0, 0, 0.39);
   border-radius: 5%;
 }
+
+.btn-outline-warning {
+  color: #d3a006;
+}
+.btn-outline-warning:hover {
+  color: #bd8e01;
+}
+.liked {
+  color: #ffc107;
+}
+.btn-outline-warning:hover > .liked {
+  color: #bd8e01;
+}
