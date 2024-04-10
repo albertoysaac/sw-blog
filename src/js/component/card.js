@@ -1,23 +1,57 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Context } from "../store/appContext";
 import { Link } from "react-router-dom";
 
 export const Card = (props) => {
   const { store, actions } = useContext(Context);
+  useEffect(() => {
+    like(props.id);
+  }, [store.favorites]);
+
+  const [favorite, setFavorite] = useState();
+
+  function content() {
+    let data = props.data;
+    console.log(props.data.name);
+    if (props.type === "people") {
+      return (
+        <>
+          <h4 className="card-title">{(props.data).name}</h4>
+          <p className="card-text"> Gender: {props.data.gender}</p>
+          <p className="card-text"> Hair Color: {props.data.hair_color}</p>
+          <p className="card-text">Eye Color: {props.data.eye_color}</p>
+        </>
+      );
+    }
+    if (props.data.type === "planets") {
+      return (
+        <>
+          <h4 className="card-title">{props.data.name}</h4>
+          <p className="card-text"> Population: {props.data.population}</p>
+          <p className="card-text"> Terrain: {props.data.terrain}</p>
+        </>
+      );
+    }
+  }
+
+  function like(id) {
+    let isliked = store.favorites.find((item) => item.id === id);
+    if (isliked) {
+      setFavorite("-fill liked");
+    } else {
+      setFavorite("");
+    }
+  }
   return (
     <div className="card" style={{ width: "18rem" }}>
       <img
-        src={`https://picsum.photos/200/10${props.id - 1}`}
+        src={`https://picsum.photos/200/100`}
         className="card-img-top"
         alt="..."
       />
       <div className="card-body">
-        <h4 className="card-title">{props.name}</h4>
-        <p className="card-text">Gender: {props.gender}</p> 
-        {console.log(props.hair_color)}
-        <p className="card-text">Hair Color: {props.hair_color}</p>
-        {console.log(props.eye_color)}
-        <p className="card-text">Eye Color: {props.eye_color}</p>
+        {content()}
+
         <div className="d-flex justify-content-between">
           <Link className="btn btn-primary" to={"/character/" + props.id}>
             Learn more!
@@ -26,10 +60,17 @@ export const Card = (props) => {
             type="button"
             className="btn btn-outline-warning"
             onClick={() => {
-              actions.setFavorites(props.id);
+              actions.setFavorites(props.character.id);
+              like(props.id);
             }}
           >
-            <i className="bi bi-heart"></i>
+            <i
+              className={
+                favorite === undefined || favorite === ""
+                  ? `bi bi-heart`
+                  : `bi bi-heart` + favorite
+              }
+            ></i>
           </button>
         </div>
       </div>
