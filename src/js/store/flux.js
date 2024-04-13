@@ -3,9 +3,34 @@ const getState = ({ getStore, getActions, setStore }) => {
     store: {
       characters: [],
       character: {},
+      planets: [],
+      planet: {},
       favorites: [],
     },
     actions: {
+      urlToID: (data) => {
+        if(data.url && data.url.length > 0){
+          let id = data.url.match(/(people|planets)\/(\d+)/);
+          if (id) {
+            data.type = id[1];
+            data.id = id[2];
+          }
+          return data;
+        }else{
+          let modifiedData = data.map((item) => {
+            const id = item.url.match(/(people|planets)\/(\d+)/);
+            if (id) {
+              item.type = id[1];
+              item.id = id[2];
+            }
+
+            return item;
+          });
+          return modifiedData;
+        }
+        
+      },
+
       setFavorites: (id) => {
         getStore().characters.filter((character) => {
           if (character.url === id) {
@@ -14,15 +39,13 @@ const getState = ({ getStore, getActions, setStore }) => {
               getStore().favorites.filter((item) => item.id === id).length === 0
             ) {
               setStore({ favorites: [...getStore().favorites, favorites] });
-              
             } else {
               getActions().removeFavorite(id);
-              
             }
           }
         });
-        
       },
+
       removeFavorite: (id) => {
         getStore().favorites.filter((favorite) => {
           if (favorite.id === id) {
@@ -32,59 +55,71 @@ const getState = ({ getStore, getActions, setStore }) => {
           }
         });
       },
-      loadCharacter: (id) => {
+
+      loadCharacters: (url) => {
+        let type = "";
+        let id = "";
+        if (url.match(/\d+/)) {
+          type = url.match(/people|planets/)[0];
+          id = url.match(/\d+/)[0];
+        } else {
+          type = url;
+        }
         const method = "GET";
         getActions()
-          .queryhandler(method, "people", id)
+          .queryManager(method, type, id)
           .then(({ status, data }) => {
-            //console.log(status, data);
             if (status === 200) {
-              //console.log(data);
-              setStore({ character: data });
+              let modifiedData = getActions().urlToID(data);
+              if (type === "people"&& id === "") {
+                setStore({ characters: modifiedData });
+              }
+              else if (type === "people" && id !== "") {
+                setStore({ character: modifiedData });
+              }
+              else if (type === "planets" && id === "") {
+                setStore({ planets: modifiedData });
+              }
+              else if (type === "planets" && id !== "") {
+                setStore({ planet: modifiedData });
+              }
             }
           });
       },
 
-      loadCharacters: () => {
-        const method = "GET";
-        getActions()
-          .queryhandler(method, "people", "")
-          .then(({ status, data }) => {
-            if (status === 200) {
-              // Modificar la url de cada objeto en el array
-              const modifiedData = data.map((item) => {
-                // Extraer el número de la url
-                const number = item.url.match(/\d+/)[0];
-                // Reemplazar la url con el número
-                item.url = number;
-                //console.log(item);
-                return item;
-              });
-              setStore({ characters: modifiedData });
-            }
-          });
-      },
+      queryManager: (method, type, urljson) => {
+        let url = "";
+        let singleObject = false;
+        if (urljson === "" || urljson === null || urljson === undefined) {
+          url = "https://swapi.dev/api/" + type + "/";
+          singleObject = false;
+        } else {
+          url = "https://swapi.dev/api/" + type + "/" + urljson;
+          singleObject = true;
+        }
 
-      queryhandler: (method, type, mod) => {
-        const url = "https://swapi.dev/api/" + type + "/";
+        // const flag =
+        //   urljson !== "" || urljson !== null || urljson !== undefined
+        //     ? true
+        //     : false;
         const resquest = {
           method: method,
           headers: {
             "Content-Type": "application/json",
           },
         };
-
-        return fetch(url + mod, resquest).then((response) => {
+        console.log("url de la query: ");
+        console.log(url);
+        return fetch(url, resquest).then((response) => {
           try {
             let requestStatus = response.status;
-            //console.log(requestStatus);
+
             return response.json().then((data) => {
-              //console.log(data);
-              if (mod == "") {
-                //console.log("mod: " + mod);
+              if (singleObject === false) {
                 return { status: requestStatus, data: data.results };
               }
-              if (mod !== "") {
+              if (singleObject === true) {
+                console.log(data);
                 return { status: requestStatus, data: data };
               }
             });
