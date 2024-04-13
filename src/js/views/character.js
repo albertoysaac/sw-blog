@@ -6,8 +6,17 @@ import { Context } from "../store/appContext";
 export const Character = (props) => {
   const { store, actions } = useContext(Context);
   const params = useParams();
+  const [contentType, setContentType] = useState("");
   useEffect(() => {
-    actions.loadCharacter(params.theid);
+    let peopleName = store.character.name;
+    if (store.character.name && store.character.name.length > 0) {
+      setContentType("people");
+    } else if (store.planet.name && store.planet.name.length > 0) {
+      setContentType("planets");
+    }
+  }, [store.character, store.planets]);
+  useEffect(() => {
+    actions.loadCharacters(params.theid);
   }, []);
   return (
     <div className="character-info container-fluid">
@@ -15,13 +24,17 @@ export const Character = (props) => {
         <div className="row">
           <div className="col">
             <img
-              src={`https://picsum.photos/500/40${params.theid}`}
+              src={`https://picsum.photos/500/400`}
               className="card-img-top"
               alt="imagen del personaje"
             />
           </div>
           <div className="col">
-            <h1 className="Title">{store.character.name}</h1>
+            <h1 className="Title">
+              {contentType === "people"
+                ? store.character.name
+                : store.planet.name}
+            </h1>
             <p className="lead">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Totam
               nihil molestias quaerat quidem aut commodi temporibus tempore
@@ -41,27 +54,61 @@ export const Character = (props) => {
         <div className="row">
           <div className="col">
             <h3 className="character-data">Name</h3>
-            <p className="character-data">{store.character.name}</p>
+            <p className="character-data">
+              {contentType === "people"
+                ? store.character.name
+                : store.planet.name}
+            </p>
           </div>
           <div className="col">
-            <h3 className="character-data">birth Year</h3>
-            <p className="character-data">{store.character.birth_year}</p>
+            <h3 className="character-data">
+              {contentType === "people" ? "Birth Year" : "Climate"}
+            </h3>
+            <p className="character-data">
+              {contentType === "people"
+                ? store.character.birth_year
+                : store.planet.climate}
+            </p>
           </div>
           <div className="col">
-            <h3 className="character-data">Gender</h3>
-            <p className="character-data">{store.character.gender}</p>
+            <h3 className="character-data">
+              {contentType === "people" ? "Gender" : "Population"}
+            </h3>
+            <p className="character-data">
+              {contentType === "people"
+                ? store.character.gender
+                : store.planet.population}
+            </p>
           </div>
           <div className="col">
-            <h3 className="character-data">Height</h3>
-            <p className="character-data">{store.character.height}</p>
+            <h3 className="character-data">
+              {contentType === "people" ? "Height" : "Orbital Period"}
+            </h3>
+            <p className="character-data">
+              {contentType === "people"
+                ? store.character.height
+                : store.planet.orbital_period}
+            </p>
           </div>
           <div className="col">
-            <h3 className="character-data">Skin Color</h3>
-            <p className="character-data">{store.character.skin_color}</p>
+            <h3 className="character-data">
+              {contentType === "people" ? "Skin Color" : "Rotation Period"}
+            </h3>
+            <p className="character-data">
+              {contentType === "people"
+                ? store.character.skin_color
+                : store.planet.rotation_period}
+            </p>
           </div>
           <div className="col">
-            <h3 className="character-data">Eye color</h3>
-            <p className="character-data">{store.character.eye_color}</p>
+            <h3 className="character-data">
+              {contentType === "people" ? "Eye color" : "Diameter"}
+            </h3>
+            <p className="character-data">
+              {contentType === "people"
+                ? store.character.eye_color
+                : store.planet.diameter}
+            </p>
           </div>
         </div>
 

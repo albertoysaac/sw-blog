@@ -12,18 +12,18 @@ export const Card = (props) => {
 
   function content() {
     let data = props.data;
-    console.log(props.data.name);
-    if (props.type === "people") {
+    console.log(data.type);
+    if (data.type === "people") {
       return (
         <>
-          <h4 className="card-title">{(props.data).name}</h4>
+          <h4 className="card-title">{props.data.name}</h4>
           <p className="card-text"> Gender: {props.data.gender}</p>
           <p className="card-text"> Hair Color: {props.data.hair_color}</p>
           <p className="card-text">Eye Color: {props.data.eye_color}</p>
         </>
       );
     }
-    if (props.data.type === "planets") {
+    if (data.type === "planets") {
       return (
         <>
           <h4 className="card-title">{props.data.name}</h4>
@@ -53,15 +53,18 @@ export const Card = (props) => {
         {content()}
 
         <div className="d-flex justify-content-between">
-          <Link className="btn btn-primary" to={"/character/" + props.id}>
+          <Link
+            className="btn btn-primary"
+            to={"/" + props.data.type + "/" + props.data.type + props.data.id}
+          >
             Learn more!
           </Link>
           <button
             type="button"
             className="btn btn-outline-warning"
             onClick={() => {
-              actions.setFavorites(props.character.id);
-              like(props.id);
+              actions.setFavorites("" + props.data.type + props.data.id);
+              like("" + props.data.type + props.data.id);
             }}
           >
             <i
