@@ -7,6 +7,7 @@ export const Character = (props) => {
   const { store, actions } = useContext(Context);
   const params = useParams();
   const [contentType, setContentType] = useState("");
+
   useEffect(() => {
     let peopleName = store.character.name;
     if (store.character.name && store.character.name.length > 0) {
@@ -15,6 +16,7 @@ export const Character = (props) => {
       setContentType("planets");
     }
   }, [store.character, store.planets]);
+  
   useEffect(() => {
     actions.loadCharacters(params.theid);
   }, []);

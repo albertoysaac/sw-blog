@@ -4,16 +4,15 @@ import { Link } from "react-router-dom";
 
 export const Card = (props) => {
   const { store, actions } = useContext(Context);
+
   useEffect(() => {
-    like(props.id);
+    like(props.data.type, props.data.id);
   }, [store.favorites]);
 
   const [favorite, setFavorite] = useState();
 
   function content() {
-    let data = props.data;
-    console.log(data.type);
-    if (data.type === "people") {
+    if (props.data.type === "people") {
       return (
         <>
           <h4 className="card-title">{props.data.name}</h4>
@@ -23,7 +22,7 @@ export const Card = (props) => {
         </>
       );
     }
-    if (data.type === "planets") {
+    if (props.data.type === "planets") {
       return (
         <>
           <h4 className="card-title">{props.data.name}</h4>
@@ -34,10 +33,13 @@ export const Card = (props) => {
     }
   }
 
-  function like(id) {
-    let isliked = store.favorites.find((item) => item.id === id);
-    if (isliked) {
+  function like(type, id) {
+    const isliked = store.favorites.find(
+      (item) => item.type === type && item.id === id
+    );
+    if (isliked !== undefined) {
       setFavorite("-fill liked");
+      console.log("liked");
     } else {
       setFavorite("");
     }
@@ -63,8 +65,8 @@ export const Card = (props) => {
             type="button"
             className="btn btn-outline-warning"
             onClick={() => {
-              actions.setFavorites("" + props.data.type + props.data.id);
-              like("" + props.data.type + props.data.id);
+              actions.setFavorites(props.data.type + props.data.id)
+              console.log("like button clicked");
             }}
           >
             <i

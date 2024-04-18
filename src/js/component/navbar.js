@@ -38,12 +38,12 @@ export const Navbar = () => {
               >
                 {store.favorites.map((item) => {
                   return (
-                    <li key={item.id}>
+                    <li key={item.type.toString() + item.id.toString()}>
                       <div className="d-flex justify-content-between p-1">
                         {item.name}
                         <button
                           onClick={() => {
-                            actions.removeFavorite(item.id);
+                            actions.removeFavorite(item.type + item.id);
                           }}
                         >
                           <i className="bi bi-trash"></i>
