@@ -9,48 +9,80 @@ const getState = ({ getStore, getActions, setStore }) => {
     },
     actions: {
       urlToID: (data) => {
-        if(data.url && data.url.length > 0){
+        if (data.url && data.url.length > 0) {
           let id = data.url.match(/(people|planets)\/(\d+)/);
           if (id) {
             data.type = id[1];
             data.id = id[2];
           }
+          console.log("Dato unitario formateado");
           return data;
-        }else{
+        } else {
           let modifiedData = data.map((item) => {
             const id = item.url.match(/(people|planets)\/(\d+)/);
             if (id) {
               item.type = id[1];
               item.id = id[2];
             }
-
             return item;
           });
+          console.log("Data muktiple formateada");
           return modifiedData;
         }
-        
+      },
+      itsfavorite: (type, id, name) => {
+        if (getStore().favorites.find((item) => item.type === type && item.id === id) === undefined) {
+          const newFavorite = { type: type, id: id, name: name };
+          console.log("Nuevo favorito");
+          return newFavorite
+        } else if (getStore().favorites.find((item) => item.type === type && item.id === id).name.length > 0) {
+          console.log("Ya existe el favorito");
+          getActions().removeFavorite(type + id);
+        }
+      },
+      itsExist: (type, id) => {
+        if (type === "people") {
+          let character = getStore().characters.find((character) => character.id === id);
+          if (character !== undefined) {
+            console.log("Personaje encontrado");
+            return getActions().itsfavorite(character.type, character.id, character.name);
+          }
+          else {
+            console.log("No se encontro el personaje");
+          }
+        }
+        if (type === "planets") {
+          let planet = getStore().planets.find((planet) => planet.id === id);
+          if (planet !== undefined) {
+            return getActions().itsfavorite(planet.type, planet.id, planet.name);
+          }
+          else {
+            console.log("No se encontro el planeta");
+          }
+        }
       },
 
       setFavorites: (id) => {
-        getStore().characters.filter((character) => {
-          if (character.url === id) {
-            let favorites = { id: character.url, name: character.name };
-            if (
-              getStore().favorites.filter((item) => item.id === id).length === 0
-            ) {
-              setStore({ favorites: [...getStore().favorites, favorites] });
-            } else {
-              getActions().removeFavorite(id);
-            }
-          }
-        });
+        const iD = id.match(/(\d+)/)[0];
+        const type = id.match(/people|planets/)[0];
+        let selected = getActions().itsExist(type, iD);
+        if (selected !== undefined) {
+          setStore({ favorites: [...getStore().favorites, selected] });
+        }
+
       },
 
       removeFavorite: (id) => {
+        console.log("id a eliminar: " + id);
+        
+        const iD = id.match(/(\d+)/)[0];
+        const type = id.match(/people|planets/)[0];
         getStore().favorites.filter((favorite) => {
-          if (favorite.id === id) {
+          if (favorite.id === iD && favorite.type === type) {
             setStore({
-              favorites: getStore().favorites.filter((item) => item.id !== id),
+              favorites: getStore().favorites.filter(
+                (item) => item.id !== iD && item.type !== type
+              ),
             });
           }
         });
@@ -66,21 +98,19 @@ const getState = ({ getStore, getActions, setStore }) => {
           type = url;
         }
         const method = "GET";
+
         getActions()
           .queryManager(method, type, id)
           .then(({ status, data }) => {
             if (status === 200) {
               let modifiedData = getActions().urlToID(data);
-              if (type === "people"&& id === "") {
+              if (type === "people" && id === "") {
                 setStore({ characters: modifiedData });
-              }
-              else if (type === "people" && id !== "") {
+              } else if (type === "people" && id !== "") {
                 setStore({ character: modifiedData });
-              }
-              else if (type === "planets" && id === "") {
+              } else if (type === "planets" && id === "") {
                 setStore({ planets: modifiedData });
-              }
-              else if (type === "planets" && id !== "") {
+              } else if (type === "planets" && id !== "") {
                 setStore({ planet: modifiedData });
               }
             }
@@ -98,10 +128,6 @@ const getState = ({ getStore, getActions, setStore }) => {
           singleObject = true;
         }
 
-        // const flag =
-        //   urljson !== "" || urljson !== null || urljson !== undefined
-        //     ? true
-        //     : false;
         const resquest = {
           method: method,
           headers: {
@@ -110,6 +136,7 @@ const getState = ({ getStore, getActions, setStore }) => {
         };
         console.log("url de la query: ");
         console.log(url);
+
         return fetch(url, resquest).then((response) => {
           try {
             let requestStatus = response.status;
